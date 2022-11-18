@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Providers\RouteServiceProvider;
+use Dotenv\Exception\ValidationException as ExceptionValidationException;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use Illuminate\Validation\ValidationException;
 
 class LoginController extends Controller
 {
@@ -37,4 +39,26 @@ class LoginController extends Controller
     {
         $this->middleware('guest')->except('logout');
     }
+
+    public function login(Request $request){
+        $credentials = $request->validate([
+            'email' => 'required',
+            'password' => 'required',
+        ]);
+
+        if (! Auth::attemp($credentials)){
+            throw ValidationException::withMessages([
+                'email' => [
+                    __('auth.failed')
+                ]
+            ]);
+        }
+        return $request->user();
+    }
+
+    public function logout() 
+    {
+        return Auth::logout();
+    }
+
 }
